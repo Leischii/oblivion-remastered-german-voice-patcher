@@ -38,12 +38,16 @@ if exist "%CONFIG_FILE%" (
     if not defined REMOVE_TEMP_FILES (
         call :prompt_flag "Remove temporary files after successfully creating the mod" "REMOVE_TEMP_FILES"
     )
-
-    if not defined IGNORE_MISMATCH (
-        echo IGNORE_MISMATCH=false>> "%CONFIG_FILE%"
-    )
 ) else (
     goto eingabe_obre
+)
+
+if not defined IGNORE_MISMATCH (
+    if exist "%CONFIG_FILE%" (
+        findstr /v /r "^IGNORE_MISMATCH=.*" "%CONFIG_FILE%" > "%CONFIG_FILE%.tmp"
+        move /y "%CONFIG_FILE%.tmp" "%CONFIG_FILE%" >nul
+    )
+    echo IGNORE_MISMATCH=false>> "%CONFIG_FILE%"
 )
 
 exit /b
@@ -107,7 +111,7 @@ set "EXAMPLE=%~4"
 echo %DESC%:
 
 if not "%EXAMPLE%" == "" (
-    echo Example path: '...\%EXAMPLE%'
+    echo %EXAMPLE%
 )
 
 :prompt_path_loop

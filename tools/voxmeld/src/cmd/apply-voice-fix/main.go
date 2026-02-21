@@ -116,7 +116,7 @@ func processFiles(timeStart time.Time) {
 	}
 	semaphore := make(chan struct{}, maxParallelism)
 
-	language := "german"
+	language := os.Getenv("LANGUAGE")
 
 	file, err := os.Open(filepath.Join("custom", language, "raceAlternatives.txt"))
 	if err != nil {

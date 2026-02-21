@@ -39,8 +39,6 @@ echo STEP: Initialising patcher...
 :: =================================================================
 
 set "CONFIG_FILE=%~dp0config\settings.txt"
-set "AMOUNTS_FILE=%~dp0custom\german\amounts.txt"
-set "LAST_SUCCESSFUL_STEP_FILE=%~dp0tmp\lastStep.txt"
 
 :: Load settings file
 if exist "%CONFIG_FILE%" (
@@ -59,6 +57,40 @@ if exist "%CONFIG_FILE%" (
 ) else (
     call :throw_error "ERROR: No settings file found"
 )
+
+:: Populate available languages from the `custom` folder
+set "AVAILABLE_LANGUAGES="
+for /d %%D in ("%~dp0custom\*") do (
+    if defined AVAILABLE_LANGUAGES (
+        set "AVAILABLE_LANGUAGES=!AVAILABLE_LANGUAGES! %%~nD"
+    ) else (
+        set "AVAILABLE_LANGUAGES=%%~nD"
+    )
+)
+
+:: Validate LANGUAGE: default to german when unset or not available
+set "LANG_FOUND=0"
+if defined LANGUAGE (
+    for %%L in (!AVAILABLE_LANGUAGES!) do (
+        if /I "%%L"=="!LANGUAGE!" set "LANG_FOUND=1"
+    )
+)
+
+if not defined LANGUAGE (
+    set "LANGUAGE=german"
+) else if "!LANG_FOUND!"=="0" (
+    echo INFO: LANGUAGE '!LANGUAGE!' is not available; defaulting to 'german'
+    set "LANGUAGE=german"
+    
+    if exist "%CONFIG_FILE%" (
+        findstr /v /r "^LANGUAGE=.*" "%CONFIG_FILE%" > "%CONFIG_FILE%.tmp"
+        move /y "%CONFIG_FILE%.tmp" "%CONFIG_FILE%" >nul
+    )
+    echo LANGUAGE=german>> "%CONFIG_FILE%"
+)
+
+set "AMOUNTS_FILE=%~dp0custom\!LANGUAGE!\amounts.txt"
+set "LAST_SUCCESSFUL_STEP_FILE=%~dp0tmp\lastStep.txt"
 
 :: Load amounts file
 if exist "%AMOUNTS_FILE%" (

@@ -93,8 +93,7 @@ func processFiles(extractFolder, customFolder string, timeStart time.Time) {
 	}
 	semaphore := make(chan struct{}, maxParallelism)
 
-	// TODO: Listen to setting instead once introduced
-	language := "german"
+	language := os.Getenv("LANGUAGE")
 
 	file, err := os.Open(filepath.Join("custom", language, "replacements.txt"))
 	if err != nil {
